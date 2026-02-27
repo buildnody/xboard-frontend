@@ -1,6 +1,6 @@
-# 猫域 (NEKO) 终极部署与迁移指南 (Docker + 手动版)
+# 猫域 (NEKO) 部署与迁移指南 (Docker + 手动版)
 
-本指南旨在帮助你将“猫域 (NEKO)”项目高效地部署到任何服务器（推荐日本 VPS），并支持在多台服务器间快速迁移。
+本指南旨在帮助你将“猫域 (NEKO)”项目高效地部署到任何服务器，并支持在多台服务器间快速迁移。
 
 ---
 
@@ -126,18 +126,39 @@ certbot --nginx -d 你的域名
 
 ## 7. 常见问题与维护
 
-### 7.1 权限修复
+### 7.1 如何更新应用？
+
+当项目发布新版本时，您可以按照以下步骤更新：
+
+**Docker 方案 (推荐):**
+1.  在本地拉取最新代码：`git pull`
+2.  重新构建镜像：`docker build -t neko-app .`
+3.  停止并删除旧容器：`docker stop neko && docker rm neko`
+4.  启动新容器：`docker run -d --name neko -p 80:80 neko-app`
+
+**手动方案:**
+1.  在本地重新执行 `npm run build`。
+2.  将新的 `dist` 文件夹内容上传并覆盖服务器上的旧文件。
+3.  重启 Nginx：`sudo systemctl restart nginx`
+
+### 7.2 环境变量生效问题
+
+如果您修改了 `.env.example` 中的配置，请注意：
+- **本地开发**: 需重启 `npm start`。
+- **Docker 部署**: 环境变量主要用于 Nginx 的反代配置。如果您修改了后端 URL，必须重新构建 Docker 镜像或手动修改容器内的 `nginx.conf`。
+
+### 7.3 权限修复
 ```bash
 sudo chown -R www-data:www-data /var/www/neko
 sudo chmod -R 755 /var/www/neko
 ```
 
-### 7.2 容器日志查看 (Docker 方案)
+### 7.4 容器日志查看 (Docker 方案)
 ```bash
 docker logs -f neko
 ```
 
-### 7.3 快速迁移 Checklist
+### 7.5 快速迁移 Checklist
 1.  在新服务器安装 Docker。
 2.  上传并 `docker load` 镜像包。
 3.  `docker run` 启动。
