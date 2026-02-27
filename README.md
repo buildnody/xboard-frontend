@@ -1,4 +1,4 @@
-# 猫域 (NEKO) - 高端、独立、渐进式 Web 应用 (PWA) 前端
+# 猫域 (NEKO) - 渐进式 Web 应用 (PWA) 前端
 
 ![Angular](https://img.shields.io/badge/Angular-21.0.0-DD0031?style=for-the-badge&logo=angular)
 ![TypeScript](https://img.shields.io/badge/TypeScript-5.x-3178C6?style=for-the-badge&logo=typescript)
