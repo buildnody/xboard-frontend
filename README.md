@@ -43,7 +43,7 @@
 ### 安装依赖
 
 ```bash
-git clone https://github.com/your-username/neko-frontend.git
+git clone https://github.com/buildnody/xboard-frontend.git
 cd neko-frontend
 npm install
 ```
