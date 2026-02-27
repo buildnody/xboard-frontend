@@ -1,0 +1,31 @@
+<div class="max-w-4xl mx-auto">
+  <div class="mb-6">
+    <a routerLink="/app/knowledge" class="inline-flex items-center text-sm font-medium text-accent-start hover:text-accent-end transition-colors">
+      <svg class="h-5 w-5 mr-1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+        <path fill-rule="evenodd" d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" clip-rule="evenodd" />
+      </svg>
+      返回列表
+    </a>
+  </div>
+
+  @if (loading()) {
+    <div class="flex justify-center items-center h-64">
+      <div class="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-accent-start"></div>
+    </div>
+  } @else if (error()) {
+    <div class="bg-red-900/30 border border-red-500/50 text-red-400 px-4 py-3 rounded-xl" role="alert">
+      <strong class="font-bold">错误!</strong>
+      <span class="block sm:inline">{{ error() }}</span>
+    </div>
+  } @else if (article(); as art) {
+    <div class="bg-surface p-6 sm:p-8 rounded-2xl shadow-neumorphic-raised">
+      <h1 class="text-3xl font-bold text-text-main mb-2">{{ art.title }}</h1>
+      <p class="text-sm text-text-muted mb-6">
+        最后更新于: {{ art.updated_at | date:'yyyy-MM-dd HH:mm' }}
+      </p>
+      <div class="border-t border-dark pt-6">
+        <app-markdown-viewer [content]="art.body"></app-markdown-viewer>
+      </div>
+    </div>
+  }
+</div>

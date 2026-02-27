@@ -1,0 +1,205 @@
+<h1 class="text-3xl font-bold text-text-main mb-8">我的邀请</h1>
+
+@if (loading()) {
+  <app-loading-spinner />
+} @else if (error()) {
+  <app-error-message [message]="error()" />
+} @else if (inviteInfo(); as info) {
+  <div class="space-y-10">
+    <!-- Main Balance Card -->
+    <div class="bg-surface p-8 rounded-2xl shadow-neumorphic-raised">
+      <div class="flex flex-col md:flex-row justify-between items-center gap-4">
+        <div>
+          <h2 class="text-lg font-medium text-text-muted text-center md:text-left">当前剩余佣金</h2>
+          <p class="mt-1 text-5xl font-extrabold text-text-main text-center md:text-left">
+            {{ (info.stat[4] / 100).toFixed(2) }} <span class="text-3xl font-semibold text-text-muted align-baseline">CNY</span>
+          </p>
+        </div>
+        <button (click)="openTransferModal()" [disabled]="info.stat[4] <= 0" class="w-full md:w-auto mt-4 md:mt-0 px-8 py-3 rounded-xl font-semibold text-white bg-gradient-to-br from-accent-start to-accent-end shadow-neumorphic-raised hover:shadow-neumorphic-pressed active:shadow-neumorphic-sunken transition-all disabled:from-gray-600 disabled:to-gray-700 disabled:shadow-none disabled:cursor-not-allowed">
+            划转
+        </button>
+      </div>
+    </div>
+
+    <!-- Stats Cards -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+      <div class="bg-surface p-6 rounded-2xl shadow-neumorphic-raised">
+        <h3 class="text-sm font-medium text-text-muted">已注册用户数</h3>
+        <p class="mt-2 text-2xl font-semibold text-text-main">{{ info.stat[0] }} 人</p>
+      </div>
+       <div class="bg-surface p-6 rounded-2xl shadow-neumorphic-raised">
+        <h3 class="text-sm font-medium text-text-muted">佣金比例</h3>
+        <p class="mt-2 text-2xl font-semibold text-text-main">{{ info.stat[3] }} %</p>
+      </div>
+      <div class="bg-surface p-6 rounded-2xl shadow-neumorphic-raised">
+        <h3 class="text-sm font-medium text-text-muted">确认中的佣金</h3>
+        <p class="mt-2 text-2xl font-semibold text-text-main">¥ {{ (info.stat[2] / 100).toFixed(2) }}</p>
+      </div>
+      <div class="bg-surface p-6 rounded-2xl shadow-neumorphic-raised">
+        <h3 class="text-sm font-medium text-text-muted">累计获得佣金</h3>
+        <p class="mt-2 text-2xl font-semibold text-text-main">¥ {{ (info.stat[1] / 100).toFixed(2) }}</p>
+      </div>
+    </div>
+
+    <!-- Invite Code Management -->
+    <div class="bg-surface rounded-2xl shadow-neumorphic-raised overflow-hidden">
+      <div class="p-6 flex flex-col sm:flex-row justify-between sm:items-center gap-4">
+        <h2 class="text-xl font-semibold text-text-main">邀请码管理</h2>
+        <button (click)="generateInviteCode()" [disabled]="isGenerating()" class="w-full sm:w-auto inline-flex items-center justify-center px-5 py-2.5 rounded-xl font-semibold text-white bg-gradient-to-br from-accent-start to-accent-end shadow-neumorphic-raised hover:shadow-neumorphic-pressed active:shadow-neumorphic-sunken transition-all disabled:from-gray-600 disabled:to-gray-700 disabled:cursor-not-allowed">
+          @if (isGenerating()) {
+            <svg class="animate-spin -ml-1 mr-2 h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path></svg>
+            生成中...
+          } @else {
+             <svg class="h-5 w-5 -ml-1 mr-2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path d="M10.75 4.75a.75.75 0 00-1.5 0v4.5h-4.5a.75.75 0 000 1.5h4.5v4.5a.75.75 0 001.5 0v-4.5h4.5a.75.75 0 000-1.5h-4.5v-4.5z" /></svg>
+            生成邀请码
+          }
+        </button>
+      </div>
+      @if (info.codes.length === 0) {
+        <div class="px-6 pb-6">
+            <app-empty-state title="暂无邀请码" message="请生成一个开始邀请吧！" />
+        </div>
+      } @else {
+        <div class="overflow-x-auto">
+          <table class="min-w-full divide-y divide-dark">
+            <thead class="bg-dark/50">
+              <tr>
+                <th scope="col" class="px-6 py-4 text-left text-xs font-semibold text-text-muted uppercase tracking-wider">邀请码</th>
+                <th scope="col" class="px-6 py-4 text-left text-xs font-semibold text-text-muted uppercase tracking-wider">创建时间</th>
+                <th scope="col" class="px-6 py-4 text-left text-xs font-semibold text-text-muted uppercase tracking-wider">操作</th>
+              </tr>
+            </thead>
+            <tbody class="bg-surface divide-y divide-dark">
+              @for (code of info.codes; track code.code) {
+                <tr class="hover:bg-dark/20 transition-colors">
+                  <td class="px-6 py-4 whitespace-nowrap text-sm font-mono font-medium text-text-main">{{ code.code }}</td>
+                  <td class="px-6 py-4 whitespace-nowrap text-sm text-text-muted">{{ code.created_at | date:'yyyy-MM-dd HH:mm' }}</td>
+                  <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                    <button (click)="copyInviteLink(code.code)" class="text-accent-start hover:text-accent-end transition-colors">
+                      {{ copySuccessCode() === code.code ? '已复制!' : '复制链接' }}
+                    </button>
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      }
+    </div>
+    
+    <!-- Commission Log -->
+    <div class="bg-surface rounded-2xl shadow-neumorphic-raised overflow-hidden">
+        <div class="p-6">
+            <h2 class="text-xl font-semibold text-text-main">佣金发放记录</h2>
+        </div>
+        <div class="border-t border-dark">
+            @if (loadingLogs()) {
+              <app-loading-spinner />
+            } @else if (logsError()) {
+              <app-error-message [message]="logsError()" />
+            } @else if (commissionLogs().length === 0) {
+              <app-empty-state title="暂无记录" message="这里还没有任何佣金发放记录。" />
+            } @else {
+              <div class="overflow-x-auto">
+                <table class="min-w-full divide-y divide-dark">
+                  <thead class="bg-dark/50">
+                    <tr>
+                      <th scope="col" class="px-6 py-4 text-left text-xs font-semibold text-text-muted uppercase tracking-wider">订单号</th>
+                      <th scope="col" class="px-6 py-4 text-left text-xs font-semibold text-text-muted uppercase tracking-wider">订单金额</th>
+                      <th scope="col" class="px-6 py-4 text-left text-xs font-semibold text-text-muted uppercase tracking-wider">获得佣金</th>
+                      <th scope="col" class="px-6 py-4 text-left text-xs font-semibold text-text-muted uppercase tracking-wider">状态</th>
+                      <th scope="col" class="px-6 py-4 text-left text-xs font-semibold text-text-muted uppercase tracking-wider">时间</th>
+                    </tr>
+                  </thead>
+                  <tbody class="bg-surface divide-y divide-dark">
+                    @for (log of commissionLogs(); track log.trade_no) {
+                      <tr class="hover:bg-dark/20 transition-colors">
+                        <td class="px-6 py-4 whitespace-nowrap text-sm font-mono font-medium text-text-main">{{ log.trade_no }}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-text-muted">¥{{ (log.order_amount / 100).toFixed(2) }}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm font-semibold text-green-400">+ ¥{{ (log.commission_amount / 100).toFixed(2) }}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm">
+                          @if(log.commission_status === 1) {
+                            <span class="px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-500/80 text-white/90">
+                              已到账
+                            </span>
+                          } @else {
+                            <span class="px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-yellow-500/80 text-white/90">
+                              待结算
+                            </span>
+                          }
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-text-muted">{{ log.created_at | date:'yyyy-MM-dd HH:mm' }}</td>
+                      </tr>
+                    }
+                  </tbody>
+                </table>
+              </div>
+              <!-- Pagination -->
+              @if (logsTotal() > logsPageSize()) {
+                <div class="p-4 flex justify-center items-center gap-4 text-sm border-t border-dark">
+                  <button (click)="changeLogsPage(logsCurrentPage() - 1)" 
+                          [disabled]="logsCurrentPage() === 1"
+                          class="px-4 py-2 rounded-lg bg-dark shadow-neumorphic-raised hover:shadow-neumorphic-pressed disabled:opacity-50 disabled:cursor-not-allowed transition-all">
+                    上一页
+                  </button>
+                  <span class="text-text-muted font-semibold">
+                    第 {{ logsCurrentPage() }} / {{ logsTotalPages() }} 页
+                  </span>
+                  <button (click)="changeLogsPage(logsCurrentPage() + 1)"
+                          [disabled]="logsCurrentPage() === logsTotalPages()"
+                          class="px-4 py-2 rounded-lg bg-dark shadow-neumorphic-raised hover:shadow-neumorphic-pressed disabled:opacity-50 disabled:cursor-not-allowed transition-all">
+                    下一页
+                  </button>
+                </div>
+              }
+            }
+        </div>
+    </div>
+  </div>
+}
+
+<!-- Transfer Modal -->
+@if (showTransferModal()) {
+  <div class="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4" (click)="showTransferModal.set(false)">
+    <form class="bg-surface rounded-2xl shadow-neumorphic-raised w-full max-w-md" (click)="$event.stopPropagation()" [formGroup]="transferForm" (ngSubmit)="confirmTransfer()">
+      <div class="p-6 border-b border-dark">
+        <h3 class="text-lg font-semibold text-text-main">佣金划转至余额</h3>
+      </div>
+      <div class="p-6 space-y-4">
+        <div>
+          <label for="transfer-amount" class="block text-sm font-medium text-text-muted mb-2">划转金额</label>
+          <div class="relative">
+              <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-text-muted">¥</span>
+              <input type="number" id="transfer-amount" name="transfer-amount" required
+                    step="0.01"
+                    placeholder="0.00"
+                    formControlName="amount"
+                    class="block w-full pl-7 pr-4 py-3 bg-dark text-text-main placeholder-text-muted focus:outline-none focus:ring-2 focus:ring-accent-start rounded-xl shadow-neumorphic-sunken transition-shadow">
+          </div>
+          <p class="text-xs text-text-muted mt-2">最多可划转: ¥ {{ maxTransferAmount().toFixed(2) }}</p>
+        </div>
+        
+        @if (transferError()) {
+          <div class="p-3 text-sm text-red-400 bg-red-900/30 border border-red-500/50 rounded-lg">
+            {{ transferError() }}
+          </div>
+        }
+      </div>
+      <div class="px-6 py-4 bg-dark/50 border-t border-dark flex justify-end items-center gap-4">
+        <button type="button" (click)="showTransferModal.set(false)" class="px-5 py-2.5 rounded-xl font-semibold text-text-main bg-surface shadow-neumorphic-raised hover:shadow-neumorphic-pressed active:shadow-neumorphic-sunken transition-all">
+          取消
+        </button>
+        <button type="submit" [disabled]="isTransferring() || transferForm.invalid" class="px-5 py-2.5 rounded-xl font-semibold text-white bg-gradient-to-br from-accent-start to-accent-end shadow-neumorphic-raised hover:shadow-neumorphic-pressed active:shadow-neumorphic-sunken transition-all disabled:from-gray-600 disabled:to-gray-700 disabled:cursor-not-allowed">
+          @if(isTransferring()) {
+            <div class="flex items-center">
+              <svg class="animate-spin -ml-1 mr-2 h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path></svg>
+              处理中...
+            </div>
+          } @else {
+            确认划转
+          }
+        </button>
+      </div>
+    </form>
+  </div>
+}

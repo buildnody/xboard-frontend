@@ -1,0 +1,95 @@
+<h1 class="text-3xl font-bold text-text-main mb-8">个人中心</h1>
+
+@if(userState.currentUser(); as user) {
+<div class="max-w-3xl mx-auto space-y-10">
+
+  <!-- My Wallet Card -->
+  <div class="bg-surface p-6 sm:p-8 rounded-2xl shadow-neumorphic-raised">
+    <h2 class="text-xl font-semibold text-text-main mb-6">我的钱包</h2>
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
+      <div>
+        <label class="block text-sm font-medium text-text-muted">账户余额</label>
+        <p class="text-3xl font-bold text-text-main mt-2">¥ {{ (user.balance / 100).toFixed(2) }}</p>
+      </div>
+      <div>
+        <label class="block text-sm font-medium text-text-muted">可用佣金</label>
+        <p class="text-3xl font-bold text-text-main mt-2">¥ {{ (user.commission_balance / 100).toFixed(2) }}</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Change Password Card -->
+  <div class="bg-surface p-6 sm:p-8 rounded-2xl shadow-neumorphic-raised">
+    <h2 class="text-xl font-semibold text-text-main mb-6">修改密码</h2>
+    <form class="space-y-4" [formGroup]="passwordForm" (ngSubmit)="changePassword()">
+      <div>
+        <label for="old-password" class="block text-sm font-medium text-text-muted mb-2">旧密码</label>
+        <input type="password" id="old-password" name="old-password" required formControlName="oldPassword"
+               class="block w-full px-4 py-3 bg-dark text-text-main placeholder-text-muted focus:outline-none focus:ring-2 focus:ring-accent-start rounded-xl shadow-neumorphic-sunken transition-shadow">
+      </div>
+       <div>
+        <label for="new-password" class="block text-sm font-medium text-text-muted mb-2">新密码</label>
+        <input type="password" id="new-password" name="new-password" required formControlName="newPassword"
+               class="block w-full px-4 py-3 bg-dark text-text-main placeholder-text-muted focus:outline-none focus:ring-2 focus:ring-accent-start rounded-xl shadow-neumorphic-sunken transition-shadow">
+      </div>
+       <div>
+        <label for="confirm-password" class="block text-sm font-medium text-text-muted mb-2">确认新密码</label>
+        <input type="password" id="confirm-password" name="confirm-password" required formControlName="confirmPassword"
+               class="block w-full px-4 py-3 bg-dark text-text-main placeholder-text-muted focus:outline-none focus:ring-2 focus:ring-accent-start rounded-xl shadow-neumorphic-sunken transition-shadow">
+      </div>
+
+      <div class="pt-2">
+        <button type="submit" [disabled]="isChangingPassword() || passwordForm.invalid"
+                class="inline-flex justify-center py-2.5 px-6 text-sm font-semibold rounded-xl text-white bg-gradient-to-br from-accent-start to-accent-end shadow-neumorphic-raised hover:shadow-neumorphic-pressed active:shadow-neumorphic-sunken focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-dark focus:ring-accent-end transition-all duration-200 disabled:from-gray-600 disabled:to-gray-700 disabled:cursor-not-allowed">
+          @if(isChangingPassword()) {
+             <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+              <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            </svg>
+            处理中...
+          } @else {
+            确认修改
+          }
+        </button>
+      </div>
+    </form>
+  </div>
+  
+  <!-- Subscription Management -->
+  <div class="bg-surface p-6 sm:p-8 rounded-2xl shadow-neumorphic-raised">
+    <h2 class="text-xl font-semibold text-text-main mb-4">订阅管理</h2>
+    <p class="text-text-muted mb-6">如果您的订阅链接怀疑已经泄露，您可以在此重置。旧链接将立即失效。</p>
+    
+    <button (click)="requestResetSubscriptionLink()" [disabled]="isResettingLink()"
+            class="w-full sm:w-auto inline-flex justify-center items-center bg-gradient-to-br from-yellow-500 to-orange-600 text-white font-bold py-2.5 px-6 rounded-xl shadow-neumorphic-raised hover:shadow-neumorphic-pressed active:shadow-neumorphic-sunken text-base transition-all duration-200 disabled:from-gray-600 disabled:to-gray-700 disabled:cursor-not-allowed">
+        @if (isResettingLink()) {
+          <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+          正在重置...
+        } @else {
+          重置订阅链接
+        }
+    </button>
+  </div>
+  
+  <div class="bg-surface p-6 sm:p-8 rounded-2xl shadow-neumorphic-raised">
+    <h2 class="text-xl font-semibold text-text-main mb-4">账户操作</h2>
+    <p class="text-text-muted mb-6">登出您的账户，您将需要重新登录才能访问您的仪表盘。</p>
+    <button (click)="requestLogout()" 
+            class="w-full sm:w-auto inline-flex justify-center items-center bg-gradient-to-br from-red-600 to-red-800 text-white font-bold py-2.5 px-6 rounded-xl shadow-neumorphic-raised hover:shadow-neumorphic-pressed active:shadow-neumorphic-sunken text-base transition-all duration-200">
+      退出登录
+    </button>
+  </div>
+
+</div>
+}
+
+<app-confirm-action-modal
+  [isOpen]="showConfirmModal()"
+  (close)="cancelAction()"
+  (confirm)="confirmAction()"
+  [title]="confirmModalConfig().title"
+  [message]="confirmModalConfig().message"
+  [confirmText]="confirmModalConfig().confirmText"
+  [confirmClass]="confirmModalConfig().confirmClass"
+  [showCancelButton]="false"
+/>

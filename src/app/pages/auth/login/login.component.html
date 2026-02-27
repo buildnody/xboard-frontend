@@ -1,0 +1,59 @@
+<div class="flex items-center justify-center min-h-screen bg-dark p-4">
+  <div class="w-full max-w-md p-10 space-y-8 bg-surface rounded-2xl shadow-neumorphic-raised">
+    <div class="text-center">
+      <h1 class="text-3xl font-bold text-text-main">猫域 (NEKO)</h1>
+      <p class="mt-2 text-text-muted">欢迎回来，请登录您的账户</p>
+    </div>
+    <form class="mt-8 space-y-6" [formGroup]="loginForm" (ngSubmit)="login()">
+      
+      <div>
+        <label for="email-address" class="sr-only">邮箱地址</label>
+        <input id="email-address" name="email" type="email" autocomplete="email" required
+               formControlName="email"
+               class="relative block w-full px-4 py-3 bg-dark text-text-main placeholder-text-muted focus:outline-none focus:ring-2 focus:ring-accent-start sm:text-sm rounded-xl shadow-neumorphic-sunken transition-shadow"
+               placeholder="邮箱地址">
+      </div>
+      <div>
+        <label for="password" class="sr-only">密码</label>
+        <input id="password" name="password" type="password" autocomplete="current-password" required
+               formControlName="password"
+               class="relative block w-full px-4 py-3 bg-dark text-text-main placeholder-text-muted focus:outline-none focus:ring-2 focus:ring-accent-start sm:text-sm rounded-xl shadow-neumorphic-sunken transition-shadow"
+               placeholder="密码">
+      </div>
+
+      <div class="flex items-center justify-end text-sm">
+        <a routerLink="/forgot-password" class="font-medium text-accent-start hover:text-accent-end transition-colors">
+          忘记密码？
+        </a>
+      </div>
+
+      @if (errorMessage()) {
+        <div class="p-3 text-sm text-red-400 bg-red-900/30 border border-red-500/50 rounded-lg">
+          {{ errorMessage() }}
+        </div>
+      }
+
+      <div>
+        <button type="submit" [disabled]="isLoading() || loginForm.invalid"
+                class="group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-semibold rounded-xl text-white bg-gradient-to-br from-accent-start to-accent-end shadow-neumorphic-raised hover:shadow-neumorphic-pressed active:shadow-neumorphic-sunken focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-dark focus:ring-accent-end transition-all duration-200 ease-in-out transform hover:-translate-y-0.5 active:translate-y-0.5 disabled:from-gray-500 disabled:to-gray-600 disabled:shadow-none disabled:cursor-not-allowed">
+          @if (isLoading()) {
+            <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+              <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            </svg>
+            处理中...
+          } @else {
+            登 录
+          }
+        </button>
+      </div>
+
+      <p class="text-sm text-center text-text-muted !mt-8">
+        还没有账户？
+        <a routerLink="/register" class="font-medium text-accent-start hover:text-accent-end transition-colors">
+          立即注册
+        </a>
+      </p>
+    </form>
+  </div>
+</div>

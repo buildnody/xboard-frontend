@@ -1,0 +1,147 @@
+<div class="max-w-4xl mx-auto">
+@if (loading()) {
+  <div class="flex flex-col items-center text-center bg-surface p-8 rounded-2xl shadow-neumorphic-raised">
+    <div class="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-accent-start mb-4"></div>
+    <h1 class="text-2xl font-bold text-text-main">正在获取订单信息...</h1>
+    <p class="text-text-muted mt-2">请稍候。</p>
+  </div>
+} @else if (error()) {
+  <div class="text-center bg-surface p-8 rounded-2xl shadow-neumorphic-raised">
+    <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16 mx-auto text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+      <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+    </svg>
+    <h1 class="text-2xl font-bold text-text-main mt-4">出错了</h1>
+    <p class="text-red-400 mt-2">{{ error() }}</p>
+    <a routerLink="/app/plans" class="mt-8 inline-block py-3 px-6 rounded-xl font-semibold text-white bg-gradient-to-br from-accent-start to-accent-end shadow-neumorphic-raised hover:shadow-neumorphic-pressed active:shadow-neumorphic-sunken transition-all">返回商店</a>
+  </div>
+} @else if (orderDetail(); as order) {
+  @switch (order.status) {
+    @case (1) @case(3) {
+      <div class="text-center bg-surface p-8 rounded-2xl shadow-neumorphic-raised">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16 mx-auto text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+        </svg>
+        <h1 class="text-3xl font-bold text-text-main mt-4">订单已完成！</h1>
+        <p class="text-text-muted mt-2">您的订阅已激活。您可以返回仪表盘查看。</p>
+        <a routerLink="/app/dashboard" class="mt-8 inline-block py-3 px-6 rounded-xl font-semibold text-white bg-gradient-to-br from-accent-start to-accent-end shadow-neumorphic-raised hover:shadow-neumorphic-pressed active:shadow-neumorphic-sunken transition-all">返回仪表盘</a>
+      </div>
+    }
+    @case (2) {
+      <div class="text-center bg-surface p-8 rounded-2xl shadow-neumorphic-raised">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16 mx-auto text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
+        </svg>
+        <h1 class="text-3xl font-bold text-text-main mt-4">订单已取消</h1>
+        <p class="text-text-muted mt-2">此订单已关闭或已过期。</p>
+        <a routerLink="/app/plans" class="mt-8 inline-block py-3 px-6 rounded-xl font-semibold text-white bg-gradient-to-br from-accent-start to-accent-end shadow-neumorphic-raised hover:shadow-neumorphic-pressed active:shadow-neumorphic-sunken transition-all">重新选购</a>
+      </div>
+    }
+    @case (0) {
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 lg:gap-12">
+        <!-- Left Column: Details & Payment -->
+        <div class="lg:col-span-2 space-y-8">
+          <div class="bg-surface p-6 sm:p-8 rounded-2xl shadow-neumorphic-raised">
+            <h2 class="text-xl font-semibold text-text-main mb-4">商品信息</h2>
+            <div class="space-y-2 text-text-muted">
+              <p><span class="w-24 inline-block">产品名称:</span> <strong class="text-text-main">{{ order.plan.name }}</strong></p>
+              <p><span class="w-24 inline-block">类型/周期:</span> <strong class="text-text-main">{{ getPeriodName(order.period) }}</strong></p>
+              <p><span class="w-24 inline-block">产品流量:</span> <strong class="text-text-main">{{ (order.plan.transfer_enable / (1024*1024*1024)).toFixed(0) }} GB</strong></p>
+            </div>
+          </div>
+          <div class="bg-surface p-6 sm:p-8 rounded-2xl shadow-neumorphic-raised">
+            <div class="flex justify-between items-center mb-4">
+              <h2 class="text-xl font-semibold text-text-main">订单信息</h2>
+              <button (click)="cancelOrder()" [disabled]="isCancelling()" class="px-3 py-1.5 text-xs font-semibold rounded-lg text-red-400 bg-dark shadow-neumorphic-raised hover:shadow-neumorphic-pressed active:shadow-neumorphic-sunken transition-all disabled:opacity-50">
+                关闭订单
+              </button>
+            </div>
+            <div class="space-y-2 text-text-muted">
+              <p><span class="w-24 inline-block">订单号:</span> <strong class="text-text-main font-mono">{{ order.trade_no }}</strong></p>
+              <p><span class="w-24 inline-block">创建时间:</span> <strong class="text-text-main">{{ order.created_at | date:'yyyy-MM-dd HH:mm:ss' }}</strong></p>
+            </div>
+          </div>
+          
+          <!-- Payment Method Selection -->
+          <div class="bg-surface p-6 sm:p-8 rounded-2xl shadow-neumorphic-raised">
+            <h2 class="text-xl font-semibold text-text-main mb-4">选择支付方式</h2>
+            @if (loadingPaymentMethods()) {
+              <div class="flex justify-center items-center py-8">
+                <div class="animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-accent-start"></div>
+              </div>
+            } @else if (paymentMethods().length > 0) {
+              <div class="space-y-4">
+                @for(method of paymentMethods(); track method.id) {
+                  <label 
+                    class="block p-4 rounded-xl transition-all duration-200 cursor-pointer flex items-center gap-4"
+                    [class.bg-dark]="selectedPaymentMethodId() === method.id"
+                    [class.shadow-neumorphic-sunken]="selectedPaymentMethodId() === method.id"
+                    [class.shadow-neumorphic-raised]="selectedPaymentMethodId() !== method.id"
+                    [class.hover:shadow-neumorphic-pressed]="selectedPaymentMethodId() !== method.id">
+                    <input type="radio" name="payment-method" class="hidden" [value]="method.id" [checked]="selectedPaymentMethodId() === method.id" (change)="selectedPaymentMethodId.set(method.id)">
+                    <div class="w-10 h-10 bg-dark/50 rounded-lg flex items-center justify-center shadow-neumorphic-sunken">
+                      @switch (method.name) {
+                        @case ('支付宝') {
+                          <svg viewBox="0 0 72 72" fill="none" xmlns="http://www.w3.org/2000/svg" class="h-7 w-7"><path d="M68 36.3159C68 53.864 53.8444 68 36.3533 68C18.8622 68 4.70667 53.864 4.70667 36.3159C4.70667 18.7679 18.8622 4.63184 36.3533 4.63184C53.8444 4.63184 68 18.7679 68 36.3159Z" fill="#1677FF"></path><path d="M49.6923 25.0483H38.2195L36.3475 31.6836H45.029L44.5029 34.3315H35.8214L30.1772 54.1741H22.133L32.2285 20.354H52.1711L51.6449 23.0019L49.6923 25.0483ZM34.7431 38.3375H43.4246L41.5526 48.0197L34.7431 38.3375Z" fill="white"></path></svg>
+                        }
+                        @case ('微信') {
+                          <svg viewBox="0 0 100 100" class="h-8 w-8">
+                            <path fill="#09B65A" d="M50,5C25.2,5,5,25.2,5,50s20.2,45,45,45s45-20.2,45-45S74.8,5,50,5z"></path>
+                            <path fill="#FFF" d="M77.3,43.2c-1.3,0-2.5-0.1-3.8-0.2c-0.3,3.1-1.6,6-3.8,8.5c-2.3,2.7-5.2,4.4-8.7,5.1c-1.2,0.2-2.5,0.4-3.7,0.4 c-4.9,0-9.2-1.7-12.7-4.8c-3.1-2.8-5-6.6-5.4-11.1c-1.2,0.1-2.4,0.1-3.6,0.1c-1.2,0-2.3-0.4-3.1-1.3c-0.8-0.9-1.2-2-1.2-3.3 c0-1.2,0.4-2.3,1.2-3.1c0.8-0.8,1.9-1.2,3.1-1.2c1.2,0,2.4,0.1,3.6,0.1c0.4-4.5,2.3-8.3,5.4-11.1c3.5-3.1,7.8-4.8,12.7-4.8 c1.3,0,2.5,0.1,3.8,0.4c3.5,0.7,6.4,2.4,8.7,5.1c2.2,2.5,3.5,5.3,3.8,8.5c1.3-0.1,2.5-0.2,3.8-0.2c1.2,0,2.3,0.4,3.1,1.2 c0.8,0.8,1.2,1.9,1.2,3.1c0,1.3-0.4,2.4-1.2,3.3C79.6,42.8,78.5,43.2,77.3,43.2z M45.8,42.8c1.3,0,2.4-0.5,3.3-1.4 c0.9-0.9,1.4-2.1,1.4-3.3c0-1.3-0.5-2.4-1.4-3.3c-0.9-0.9-2.1-1.4-3.3-1.4c-1.3,0-2.4,0.5-3.3,1.4c-0.9,0.9-1.4,2.1-1.4,3.3 c0,1.3,0.5,2.4,1.4,3.3C43.4,42.4,44.5,42.8,45.8,42.8z M62.8,42.8c1.3,0,2.4-0.5,3.3-1.4c0.9-0.9,1.4-2.1,1.4-3.3 c0-1.3-0.5-2.4-1.4-3.3c-0.9-0.9-2.1-1.4-3.3-1.4c-1.3,0-2.4,0.5-3.3,1.4c-0.9,0.9-1.4,2.1-1.4,3.3c0,1.3,0.5,2.4,1.4,3.3 C60.4,42.4,61.5,42.8,62.8,42.8z"></path>
+                          </svg>
+                        }
+                        @default {
+                          <svg class="h-6 w-6 text-text-muted" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H4a3 3 0 00-3 3v8a3 3 0 003 3z"></path></svg>
+                        }
+                      }
+                    </div>
+                    <span class="font-semibold text-text-main">{{ method.name }}</span>
+                  </label>
+                }
+              </div>
+              <div class="mt-8">
+                <button (click)="checkout()" [disabled]="isCheckingOut() || selectedPaymentMethodId() === null"
+                        class="w-full py-3 px-4 rounded-xl text-white font-semibold transition-all duration-200 ease-in-out transform hover:-translate-y-0.5 active:translate-y-0.5 bg-gradient-to-br from-accent-start to-accent-end shadow-neumorphic-raised hover:shadow-neumorphic-pressed active:shadow-neumorphic-sunken disabled:from-gray-600 disabled:to-gray-700 disabled:shadow-none disabled:cursor-not-allowed">
+                    @if (isCheckingOut()) {
+                        <div class="flex items-center justify-center">
+                          <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path></svg>
+                          处理中...
+                        </div>
+                      } @else {
+                        结账
+                      }
+                </button>
+              </div>
+            } @else {
+              <p class="text-text-muted text-center py-8">暂无可用支付方式。</p>
+            }
+          </div>
+        </div>
+
+        <!-- Right Column: Order Summary -->
+        <div class="lg:col-span-1">
+          <div class="bg-dark p-6 sm:p-8 rounded-2xl shadow-neumorphic-raised sticky top-10">
+            <h2 class="text-xl font-semibold text-text-main mb-6 border-b border-surface pb-4">订单总额</h2>
+            <div class="space-y-4">
+              <div class="flex justify-between text-text-muted">
+                <span>{{ order.plan.name }}</span>
+                <span>¥{{ (originalPrice() / 100).toFixed(2) }}</span>
+              </div>
+              @if (order.balance_amount && order.balance_amount > 0) {
+                <div class="flex justify-between text-green-400">
+                  <span>余额支付</span>
+                  <span>- ¥{{ (order.balance_amount / 100).toFixed(2) }}</span>
+                </div>
+              }
+              <div class="border-t border-surface my-4"></div>
+              <div class="flex justify-between items-baseline text-text-main">
+                <span class="font-semibold">总计</span>
+                <span class="text-3xl font-bold">¥{{ (order.total_amount / 100).toFixed(2) }}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    }
+  }
+}
+</div>

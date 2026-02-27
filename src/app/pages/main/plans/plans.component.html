@@ -1,0 +1,94 @@
+<h1 class="text-3xl font-bold text-text-main mb-6">订阅计划</h1>
+
+@if (loading()) {
+  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
+    @for (_ of [1, 2, 3]; track $index) {
+      <app-card-skeleton />
+    }
+  </div>
+} @else if (error()) {
+  <div class="bg-red-900/30 border border-red-500/50 text-red-400 px-4 py-3 rounded-xl" role="alert">
+    <strong class="font-bold">错误!</strong>
+    <span class="block sm:inline">{{ error() }}</span>
+  </div>
+} @else {
+  <!-- Filter Buttons -->
+  <div class="mb-8">
+    <div class="inline-flex rounded-xl bg-surface p-1.5 shadow-neumorphic-sunken">
+      <button (click)="setFilter('all')"
+              [class.bg-dark]="filterType() === 'all'"
+              [class.shadow-neumorphic-raised]="filterType() === 'all'"
+              [class.text-text-main]="filterType() === 'all'"
+              [class.text-text-muted]="filterType() !== 'all'"
+              class="px-6 py-2 rounded-lg text-sm font-semibold transition-all duration-200 hover:text-text-main">
+        全部
+      </button>
+      <button (click)="setFilter('period')"
+              [class.bg-dark]="filterType() === 'period'"
+              [class.shadow-neumorphic-raised]="filterType() === 'period'"
+              [class.text-text-main]="filterType() === 'period'"
+              [class.text-text-muted]="filterType() !== 'period'"
+              class="px-6 py-2 rounded-lg text-sm font-semibold transition-all duration-200 hover:text-text-main">
+        按周期
+      </button>
+      <button (click)="setFilter('traffic')"
+              [class.bg-dark]="filterType() === 'traffic'"
+              [class.shadow-neumorphic-raised]="filterType() === 'traffic'"
+              [class.text-text-main]="filterType() === 'traffic'"
+              [class.text-text-muted]="filterType() !== 'traffic'"
+              class="px-6 py-2 rounded-lg text-sm font-semibold transition-all duration-200 hover:text-text-main">
+        按流量
+      </button>
+    </div>
+  </div>
+
+  @if(filteredPlans().length > 0) {
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
+      @for (plan of filteredPlans(); track plan.id) {
+        <div class="bg-surface rounded-2xl shadow-neumorphic-raised overflow-hidden flex flex-col transition-shadow duration-300 ease-in-out hover:shadow-lg">
+          <div class="p-8 flex-grow flex flex-col">
+            <h2 class="text-2xl font-bold text-text-main">{{ plan.name }}</h2>
+            
+            <div class="mt-4 flex items-baseline text-text-main">
+              @if (isPeriodic(plan)) {
+                @if (plan.original_month_price && plan.original_month_price > (plan.month_price || plan.price)) {
+                  <s class="text-2xl font-semibold text-text-muted/60 mr-2">¥{{ plan.original_month_price / 100 }}</s>
+                }
+                <span class="text-4xl font-extrabold tracking-tight">¥{{ (plan.month_price || plan.price) / 100 }}</span>
+                <span class="ml-1.5 text-xl font-semibold text-text-muted">/ 月</span>
+              } @else {
+                <span class="text-4xl font-extrabold tracking-tight">¥{{ (plan.onetime_price || plan.price) / 100 }}</span>
+                <span class="ml-1.5 text-xl font-semibold text-text-muted">/ 一次性</span>
+              }
+            </div>
+
+            <div class="my-6 border-t border-dark"></div>
+
+            <div class="flex-grow text-text-muted">
+                @if(plan.content) {
+                  <app-markdown-viewer [content]="plan.content"></app-markdown-viewer>
+                } @else {
+                  <p>暂无套餐详情。</p>
+                }
+            </div>
+          </div>
+
+          <div class="p-6 bg-dark/20 mt-auto">
+            <a [routerLink]="['/app/plans', plan.id]"
+                class="block text-center w-full py-3 px-4 rounded-xl text-white font-semibold transition-all duration-200 ease-in-out transform hover:-translate-y-0.5 active:translate-y-0.5 bg-gradient-to-br from-accent-start to-accent-end shadow-neumorphic-raised hover:shadow-neumorphic-pressed active:shadow-neumorphic-sunken">
+              立即订阅
+            </a>
+          </div>
+        </div>
+      }
+    </div>
+  } @else {
+    <div class="text-center py-20 bg-surface rounded-2xl shadow-neumorphic-raised">
+      <svg class="mx-auto h-16 w-16 text-text-muted/40" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
+      </svg>
+      <h3 class="mt-4 text-xl font-semibold text-text-main">没有找到结果</h3>
+      <p class="mt-2 text-text-muted">此分类下暂无订阅计划。</p>
+    </div>
+  }
+}

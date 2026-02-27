@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <title>猫域 (NEKO)</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="theme-color" content="#1a1a1a" />
+  <link rel="manifest" href="manifest.webmanifest" />
+  <link rel="icon" href="data:image/svg+xml,%3Csvg viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath fill='%23A0AEC0' d='M15,85 A5,5,0,0,1,15,75 H85 A5,5,0,0,1,85,85 H60 A10,10,0,0,0,40,85 H15 M15,75 C0,75,0,40,15,40 L30,15 A5,5,0,0,1,40,20 L40,40 M85,75 C100,75,100,40,85,40 L70,15 A5,5,0,0,0,60,20 L60,40 M30,55 A5,5,0,1,0,30,55.1 M70,55 A5,5,0,1,0,70,55.1'/%3E%3C/svg%3E" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="assets/js/markdown-it.min.js"></script>
+  <link rel="stylesheet" href="assets/css/github-markdown.css" />
+  <script src="assets/js/chart.umd.min.js"></script>
+  
+  <script>
+    // 资源加载检查
+    window.addEventListener('error', function(e) {
+      if (e.target.tagName === 'SCRIPT' || e.target.tagName === 'LINK') {
+        console.error('资源加载失败:', e.target.src || e.target.href);
+      }
+    }, true);
+  </script>
+  
+  <style>
+    /* THEME VARIABLES */
+    :root {
+      --color-bg: 33 41 54;
+      --color-surface: 45 55 72;
+      --color-text-main: 226 232 240;
+      --color-text-muted: 160 174 192;
+      --shadow-color-dark: rgba(17, 24, 39, 0.6);
+      --shadow-color-light: rgba(74, 85, 104, 0.15);
+    }
+
+    html.light {
+      --color-bg: 243 244 246;
+      --color-surface: 255 255 255;
+      --color-text-main: 17 24 39;
+      --color-text-muted: 75 85 99;
+      /* Redefined for a softer, non-glowing shadow in light mode */
+      --shadow-color-dark: rgba(100, 116, 139, 0.2); /* A soft grey shadow */
+      --shadow-color-light: rgba(255, 255, 255, 0); /* Disable the white highlight */
+    }
+    
+    /* Theme-aware styles for github-markdown-css */
+    .markdown-body {
+      background-color: transparent !important;
+      color: rgb(var(--color-text-muted));
+    }
+    html.light .markdown-body { color-scheme: light; }
+    html:not(.light) .markdown-body { color-scheme: dark; }
+
+    .markdown-body h1, .markdown-body h2, .markdown-body h3, .markdown-body h4, .markdown-body h5, .markdown-body h6 {
+      color: rgb(var(--color-text-main));
+      border-bottom-color: rgba(var(--color-text-main), 0.2);
+    }
+    .markdown-body a { color: #60A5FA; }
+    .markdown-body code, .markdown-body tt {
+      background-color: rgba(var(--color-text-main), 0.1);
+      color: rgb(var(--color-text-main));
+      padding: .2em .4em; margin: 0; font-size: 85%; border-radius: 6px;
+    }
+    .markdown-body pre { background-color: rgba(var(--color-text-main), 0.1); }
+    .markdown-body pre code, .markdown-body pre tt {
+      color: rgb(var(--color-text-main));
+      background-color: transparent !important;
+      padding: 0; margin: 0; font-size: 100%; border-radius: 0;
+    }
+    .markdown-body blockquote {
+      color: rgb(var(--color-text-muted));
+      border-left-color: rgba(var(--color-text-main), 0.3);
+    }
+    .markdown-body table th, .markdown-body table td {
+      border-color: rgba(var(--color-text-main), 0.3);
+      color: rgb(var(--color-text-main));
+    }
+    .markdown-body table tr {
+      background-color: transparent !important;
+      border-top-color: rgba(var(--color-text-main), 0.3);
+    }
+    .markdown-body table tr:nth-child(2n) {
+      background-color: rgba(var(--color-text-main), 0.05) !important;
+    }
+    .markdown-body hr {
+      background-color: rgba(var(--color-text-main), 0.2);
+    }
+    .markdown-body ul, .markdown-body ol { color: rgb(var(--color-text-muted)); }
+    .markdown-body img {
+      background-color: rgb(var(--color-surface)) !important;
+      max-width: 100%; height: auto;
+    }
+  </style>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            'dark': 'rgb(var(--color-bg) / <alpha-value>)',
+            'surface': 'rgb(var(--color-surface) / <alpha-value>)',
+            'text-main': 'rgb(var(--color-text-main) / <alpha-value>)',
+            'text-muted': 'rgb(var(--color-text-muted) / <alpha-value>)',
+            'accent-start': '#3B82F6', // blue-500
+            'accent-end': '#8B5CF6',   // violet-500
+          },
+          boxShadow: {
+            'neumorphic-raised': '5px 5px 10px var(--shadow-color-dark), -5px -5px 10px var(--shadow-color-light)',
+            'neumorphic-sunken': 'inset 5px 5px 10px var(--shadow-color-dark), inset -5px -5px 10px var(--shadow-color-light)',
+            'neumorphic-pressed': 'inset 2px 2px 5px var(--shadow-color-dark), inset -2px -2px 5px var(--shadow-color-light)',
+          },
+          borderRadius: {
+            'xl': '1.0rem',
+            '2xl': '1.5rem'
+          }
+        }
+      }
+    }
+  </script>
+<script type="importmap">
+{
+  "imports": {
+    "rxjs": "https://esm.sh/rxjs@^7.8.2?conditions=es2015",
+    "rxjs/operators": "https://esm.sh/rxjs@^7.8.2/operators?conditions=es2015",
+    "rxjs/ajax": "https://esm.sh/rxjs@^7.8.2/ajax?conditions=es2015",
+    "rxjs/webSocket": "https://esm.sh/rxjs@^7.8.2/webSocket?conditions=es2015",
+    "rxjs/testing": "https://esm.sh/rxjs@^7.8.2/testing?conditions=es2015",
+    "rxjs/fetch": "https://esm.sh/rxjs@^7.8.2/fetch?conditions=es2015",
+    "@angular/compiler": "https://esm.sh/@angular/compiler@^21.0.8?external=rxjs",
+    "@angular/platform-browser": "https://esm.sh/@angular/platform-browser@^21.0.8?external=rxjs",
+    "@angular/core": "https://esm.sh/@angular/core@^21.0.8?external=rxjs",
+    "@angular/router": "https://esm.sh/@angular/router@^21.0.8?external=rxjs",
+    "@angular/common/http": "https://esm.sh/angular.json@^21.0.8/http?conditions=es2015",
+    "@angular/forms": "https://esm.sh/@angular/forms@^21.0.8?external=rxjs",
+    "@angular/common": "https://esm.sh/@angular/common@^21.0.8?external=rxjs",
+    "@angular/core/rxjs-interop": "https://esm.sh/@angular/core@^21.0.8/rxjs-interop",
+    "@angular/common/": "https://esm.sh/@angular/common@^21.1.5/"
+  }
+}
+</script>
+<link rel="stylesheet" href="/index.css">
+</head>
+<body class="bg-dark text-text-muted">
+  <app-root>
+    <div style="display: flex; justify-content: center; align-items: center; height: 100vh; font-family: sans-serif; color: #a0aec0;">
+      <div style="text-align: center;">
+        <div style="width: 40px; height: 40px; border: 3px solid rgba(139, 92, 246, 0.3); border-radius: 50%; border-top-color: #8b5cf6; animation: spin 1s linear infinite; margin: 0 auto 15px;"></div>
+        <p>正在加载猫域 (NEKO)...</p>
+      </div>
+    </div>
+    <style>
+      @keyframes spin { to { transform: rotate(360deg); } }
+    </style>
+  </app-root>
+</body>
+</html>
